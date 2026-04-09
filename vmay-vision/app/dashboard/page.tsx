@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { useAuth } from '@/context/AuthContext'
 import { PATIENTS, type Patient, type RiskLevel } from '@/lib/patients'
 import { AlertTriangle, Brain, Activity, User, Thermometer, FlaskConical } from 'lucide-react'
@@ -90,10 +91,23 @@ function getGreeting() {
   return 'evening'
 }
 
+type Filter = 'ALL' | 'HIGH' | 'MONITORING'
+
 export default function DashboardPage() {
   const { user } = useAuth()
+  const [filter, setFilter] = useState<Filter>('ALL')
   const firstName = user?.name.split(' ')[0] ?? 'there'
   const high = PATIENTS.filter(p => p.riskLevel === 'HIGH').length
+
+  const filtered = PATIENTS.filter(p => {
+    if (filter === 'HIGH') return p.riskLevel === 'HIGH'
+    if (filter === 'MONITORING') return p.riskLevel !== 'HIGH'
+    return true
+  })
+
+  function toggleFilter(f: Filter) {
+    setFilter(prev => prev === f ? 'ALL' : f)
+  }
 
   return (
     <div className="h-full overflow-auto">
@@ -109,25 +123,34 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Stats row */}
+      {/* Stats row — clickable filters */}
       <div className="px-6 mb-6 grid grid-cols-3 gap-3">
-        <div className="bg-white rounded-xl border border-slate-200 px-4 py-3">
-          <p className="text-slate-500 text-xs">Total Patients</p>
-          <p className="text-2xl font-bold text-slate-800 mt-0.5">{PATIENTS.length}</p>
-        </div>
-        <div className="bg-white rounded-xl border border-red-200 px-4 py-3">
-          <p className="text-red-500 text-xs">High Risk</p>
-          <p className="text-2xl font-bold text-red-600 mt-0.5">{PATIENTS.filter(p => p.riskLevel === 'HIGH').length}</p>
-        </div>
-        <div className="bg-white rounded-xl border border-amber-200 px-4 py-3">
-          <p className="text-amber-600 text-xs">Monitoring</p>
-          <p className="text-2xl font-bold text-amber-600 mt-0.5">{PATIENTS.filter(p => p.riskLevel !== 'HIGH').length}</p>
-        </div>
+        <button
+          onClick={() => setFilter('ALL')}
+          className={`rounded-xl border px-4 py-3 text-left transition-all ${filter === 'ALL' ? 'bg-slate-800 border-slate-600' : 'bg-white border-slate-200 hover:border-slate-300'}`}
+        >
+          <p className={`text-xs ${filter === 'ALL' ? 'text-slate-400' : 'text-slate-500'}`}>Total Patients</p>
+          <p className={`text-2xl font-bold mt-0.5 ${filter === 'ALL' ? 'text-white' : 'text-slate-800'}`}>{PATIENTS.length}</p>
+        </button>
+        <button
+          onClick={() => toggleFilter('HIGH')}
+          className={`rounded-xl border px-4 py-3 text-left transition-all ${filter === 'HIGH' ? 'bg-red-600 border-red-500' : 'bg-white border-red-200 hover:border-red-300'}`}
+        >
+          <p className={`text-xs ${filter === 'HIGH' ? 'text-red-200' : 'text-red-500'}`}>High Risk</p>
+          <p className={`text-2xl font-bold mt-0.5 ${filter === 'HIGH' ? 'text-white' : 'text-red-600'}`}>{PATIENTS.filter(p => p.riskLevel === 'HIGH').length}</p>
+        </button>
+        <button
+          onClick={() => toggleFilter('MONITORING')}
+          className={`rounded-xl border px-4 py-3 text-left transition-all ${filter === 'MONITORING' ? 'bg-amber-500 border-amber-400' : 'bg-white border-amber-200 hover:border-amber-300'}`}
+        >
+          <p className={`text-xs ${filter === 'MONITORING' ? 'text-amber-100' : 'text-amber-600'}`}>Monitoring</p>
+          <p className={`text-2xl font-bold mt-0.5 ${filter === 'MONITORING' ? 'text-white' : 'text-amber-600'}`}>{PATIENTS.filter(p => p.riskLevel !== 'HIGH').length}</p>
+        </button>
       </div>
 
       {/* Patient cards */}
       <div className="px-6 pb-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {PATIENTS.map(p => <PatientCard key={p.id} patient={p} />)}
+        {filtered.map(p => <PatientCard key={p.id} patient={p} />)}
       </div>
     </div>
   )
