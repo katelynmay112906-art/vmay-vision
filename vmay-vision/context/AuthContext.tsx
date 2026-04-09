@@ -1,6 +1,6 @@
 'use client'
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
+import { createContext, useContext, useState, ReactNode } from 'react'
 import { CREDENTIALS } from '@/lib/auth'
 
 type AuthUser = { username: string; role: string; name: string }
@@ -12,13 +12,18 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<AuthUser | null>(null)
-
-  useEffect(() => {
+function getStoredUser(): AuthUser | null {
+  if (typeof window === 'undefined') return null
+  try {
     const stored = localStorage.getItem('vmay-session')
-    if (stored) setUser(JSON.parse(stored))
-  }, [])
+    return stored ? (JSON.parse(stored) as AuthUser) : null
+  } catch {
+    return null
+  }
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<AuthUser | null>(getStoredUser)
 
   function login(username: string, password: string): boolean {
     const cred = CREDENTIALS[username.toLowerCase()]
