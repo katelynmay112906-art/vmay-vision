@@ -2,13 +2,12 @@
 
 import { useAuth } from '@/context/AuthContext'
 import { useRouter, usePathname } from 'next/navigation'
-import { LayoutDashboard, Users, Bell, Settings, LogOut } from 'lucide-react'
+import { LayoutDashboard, CalendarDays, ScrollText, LogOut } from 'lucide-react'
 
 const NAV_ITEMS = [
-  { icon: LayoutDashboard, label: 'Dashboard', href: '/dashboard' },
-  { icon: Users,           label: 'Patients',  href: '/dashboard/patients' },
-  { icon: Bell,            label: 'Alerts',    href: '/dashboard/alerts' },
-  { icon: Settings,        label: 'Settings',  href: '/dashboard/settings' },
+  { icon: LayoutDashboard, label: 'Dashboard',      href: '/dashboard' },
+  { icon: CalendarDays,    label: 'Appointments',   href: '/dashboard/appointments' },
+  { icon: ScrollText,      label: 'Health History', href: '/dashboard/history' },
 ]
 
 export function Sidebar() {
@@ -28,39 +27,56 @@ export function Sidebar() {
     .join('') ?? '?'
 
   return (
-    <aside className="w-16 bg-[#0f172a] flex flex-col items-center py-4 gap-2 shrink-0">
-      <div className="w-9 h-9 rounded-lg bg-blue-600 flex items-center justify-center mb-4">
-        <span className="text-white font-bold text-base">V</span>
+    <aside className="w-56 bg-[#0b1629] flex flex-col py-5 shrink-0 border-r border-white/5">
+      {/* Logo */}
+      <div className="flex items-center gap-2.5 px-5 mb-8">
+        <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
+          <span className="text-white font-bold text-sm">V</span>
+        </div>
+        <div>
+          <p className="text-white font-semibold text-sm leading-tight">VMay Vision</p>
+          <p className="text-white/40 text-xs">Clinical AI</p>
+        </div>
       </div>
-      <nav className="flex flex-col gap-1 flex-1">
+
+      {/* Nav */}
+      <nav className="flex flex-col gap-0.5 flex-1 px-3">
         {NAV_ITEMS.map(({ icon: Icon, label, href }) => {
-          const active = pathname === href
+          const active = pathname === href || (href !== '/dashboard' && pathname.startsWith(href))
           return (
             <button
               key={href}
-              title={label}
               onClick={() => router.push(href)}
-              className={`relative w-10 h-10 rounded-lg flex items-center justify-center transition-colors
-                ${active ? 'text-blue-400' : 'text-white/40 hover:text-white/80 hover:bg-white/5'}`}
+              className={`flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all w-full text-left
+                ${active
+                  ? 'bg-blue-600/20 text-blue-400 border border-blue-500/20'
+                  : 'text-white/50 hover:text-white/80 hover:bg-white/5 border border-transparent'
+                }`}
             >
-              {active && (
-                <span className="absolute left-0 top-2 bottom-2 w-0.5 bg-blue-400 rounded-r" />
-              )}
-              <Icon size={20} />
+              <Icon size={17} className="shrink-0" />
+              {label}
             </button>
           )
         })}
       </nav>
-      <div className="flex flex-col items-center gap-2">
-        <div className="w-9 h-9 rounded-full bg-blue-700 flex items-center justify-center text-white text-xs font-semibold">
-          {initials}
+
+      {/* User + logout */}
+      <div className="px-3 pt-4 border-t border-white/5">
+        <div className="flex items-center gap-3 px-3 py-2 mb-1">
+          <div className="w-7 h-7 rounded-full bg-blue-700 flex items-center justify-center text-white text-xs font-semibold shrink-0">
+            {initials}
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-white/80 text-xs font-medium truncate">{user?.name ?? 'Clinician'}</p>
+            <p className="text-white/40 text-xs truncate">{user?.role ?? ''}</p>
+          </div>
         </div>
         <button
-          title="Logout"
           onClick={handleLogout}
-          className="w-10 h-10 rounded-lg flex items-center justify-center text-white/40 hover:text-white/80 hover:bg-white/5 transition-colors"
+          className="flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/40 hover:text-white/70 hover:bg-white/5 transition-all w-full border border-transparent"
         >
-          <LogOut size={18} />
+          <LogOut size={15} className="shrink-0" />
+          Sign out
         </button>
       </div>
     </aside>

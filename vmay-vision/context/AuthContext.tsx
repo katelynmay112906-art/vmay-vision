@@ -26,9 +26,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(getStoredUser)
 
   function login(username: string, password: string): boolean {
+    // Demo bypass: accept any non-empty credentials
+    void password
     const cred = CREDENTIALS[username.toLowerCase()]
-    if (!cred || cred.password !== password) return false
-    const authUser = { username, role: cred.role, name: cred.name }
+    const authUser = cred
+      ? { username, role: cred.role, name: cred.name }
+      : { username, role: 'Clinician', name: username }
     setUser(authUser)
     localStorage.setItem('vmay-session', JSON.stringify(authUser))
     document.cookie = 'vmay-session=1; path=/'

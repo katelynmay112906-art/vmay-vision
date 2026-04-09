@@ -12,21 +12,15 @@ export function LoginForm() {
   const router = useRouter()
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    setError('')
+    if (!username || !password) return
     setLoading(true)
-    await new Promise(r => setTimeout(r, 500))
-    const success = login(username, password)
-    if (success) {
-      router.push('/dashboard')
-    } else {
-      setError('Invalid username or password.')
-      setLoading(false)
-    }
+    await new Promise(r => setTimeout(r, 600))
+    login(username, password)
+    router.push('/dashboard')
   }
 
   return (
@@ -48,12 +42,11 @@ export function LoginForm() {
       />
       <Button
         type="submit"
-        disabled={loading}
-        className="w-full bg-blue-600 hover:bg-blue-500 text-white"
+        disabled={loading || !username || !password}
+        className="w-full bg-blue-600 hover:bg-blue-500 text-white font-medium"
       >
-        {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Signing in…</> : 'Sign In'}
+        {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Signing in…</> : 'Sign In'}
       </Button>
-      {error && <p className="text-red-400 text-sm text-center">{error}</p>}
     </form>
   )
 }
